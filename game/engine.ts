@@ -29,8 +29,10 @@ export class GameEngine {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
     this.store = store
-    // Spawn player at starting village center
-    this.player = new Player(29 * TILE_SIZE, 23 * TILE_SIZE)
+    // Spawn player just below the Starting Village door, on the path
+    // Starting Village: tileX=25, tileY=20, width=8, height=8
+    // Door is at bottom center: tileX=28, bottomY=27 → spawn at y=29 (outside)
+    this.player = new Player(28 * TILE_SIZE, 29 * TILE_SIZE)
     this.particles = new ParticleSystem()
     this.ctx.imageSmoothingEnabled = false
   }

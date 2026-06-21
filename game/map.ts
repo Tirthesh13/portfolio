@@ -60,14 +60,21 @@ function generateMap(): Tile[][] {
     }
   }
 
-  // Draw zones as buildings
+  // Draw zones as buildings — walls on border, floor inside
+  // Door is on the bottom wall, centered (2 tiles wide so player can pass)
   for (const zone of ZONES) {
+    const doorTileX = zone.tileX + Math.floor(zone.width / 2) - 1
+    const bottomWallY = zone.tileY + zone.height - 1
+
     for (let dy = 0; dy < zone.height; dy++) {
       for (let dx = 0; dx < zone.width; dx++) {
         const tx = zone.tileX + dx
         const ty = zone.tileY + dy
         if (ty >= 0 && ty < MAP_ROWS && tx >= 0 && tx < MAP_COLS) {
-          if (dy === 0 || dy === zone.height - 1 || dx === 0 || dx === zone.width - 1) {
+          const isBorder = dy === 0 || dy === zone.height - 1 || dx === 0 || dx === zone.width - 1
+          // Carve door: 2 tiles wide on the bottom wall
+          const isDoor = ty === bottomWallY && (tx === doorTileX || tx === doorTileX + 1)
+          if (isBorder && !isDoor) {
             map[ty][tx] = Tile.WALL
           } else {
             map[ty][tx] = Tile.FLOOR
@@ -77,21 +84,26 @@ function generateMap(): Tile[][] {
     }
   }
 
-  // Draw dirt paths connecting all zones to center
+  // Draw dirt paths connecting zones — paths run from door tile outward
   const centerX = 29
   const centerY = 24
-  const endpoints = ZONES.map(z => ({ x: z.tileX + Math.floor(z.width / 2), y: z.tileY + Math.floor(z.height / 2) }))
-  for (const ep of endpoints) {
-    // Horizontal then vertical path
-    const minX = Math.min(ep.x, centerX)
-    const maxX = Math.max(ep.x, centerX)
-    for (let x = minX; x <= maxX; x++) {
-      if (map[ep.y]?.[x] === Tile.GRASS) map[ep.y][x] = Tile.PATH
-    }
-    const minY = Math.min(ep.y, centerY)
-    const maxY = Math.max(ep.y, centerY)
+
+  for (const zone of ZONES) {
+    // Door exits from bottom center of zone
+    const doorTileX = zone.tileX + Math.floor(zone.width / 2) - 1
+    const doorExitY = zone.tileY + zone.height  // one tile below the door
+
+    // Path runs down/up from door to centerY, then left/right to centerX
+    const minY = Math.min(doorExitY, centerY)
+    const maxY = Math.max(doorExitY, centerY)
     for (let y = minY; y <= maxY; y++) {
-      if (map[y]?.[centerX] === Tile.GRASS) map[y][centerX] = Tile.PATH
+      if (map[y]?.[doorTileX] !== Tile.WALL) map[y][doorTileX] = Tile.PATH
+      if (map[y]?.[doorTileX + 1] !== Tile.WALL) map[y][doorTileX + 1] = Tile.PATH
+    }
+    const minX = Math.min(doorTileX, centerX)
+    const maxX = Math.max(doorTileX, centerX)
+    for (let x = minX; x <= maxX; x++) {
+      if (map[centerY]?.[x] !== Tile.WALL) map[centerY][x] = Tile.PATH
     }
   }
 

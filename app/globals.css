@@ -27,6 +27,16 @@ canvas {
   display: block;
 }
 
+/* CRT vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
 /* CRT scanline overlay */
 body::after {
   content: '';

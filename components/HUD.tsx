@@ -1,8 +1,21 @@
 'use client'
+import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '@/store/gameStore'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function HUD() {
   const { currentZone, showInteract } = useGameStore()
+  const prevZoneRef = useRef<string>(currentZone)
+  const [bannerZone, setBannerZone] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (currentZone !== prevZoneRef.current) {
+      prevZoneRef.current = currentZone
+      setBannerZone(currentZone)
+      const timer = setTimeout(() => setBannerZone(null), 2500)
+      return () => clearTimeout(timer)
+    }
+  }, [currentZone])
 
   return (
     <>
@@ -48,6 +61,43 @@ export default function HUD() {
           )}
         </div>
       </div>
+
+      {/* Zone entry banner */}
+      <AnimatePresence>
+        {bannerZone && (
+          <motion.div
+            key={bannerZone}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="font-pixel"
+            style={{
+              position: 'fixed',
+              top: '40%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 30,
+              pointerEvents: 'none',
+              textAlign: 'center',
+              background: 'rgba(0,0,0,0.82)',
+              border: '1px solid rgba(245,200,66,0.5)',
+              padding: '0.75rem 2rem',
+              boxShadow: '0 0 20px rgba(245,200,66,0.2)',
+            }}
+          >
+            <p style={{ color: '#f5c84260', fontSize: '0.5rem', marginBottom: '0.25rem' }}>
+              ═══════════════
+            </p>
+            <p style={{ color: '#f5c842', fontSize: '0.65rem' }}>
+              ENTERING: {bannerZone}
+            </p>
+            <p style={{ color: '#f5c84260', fontSize: '0.5rem', marginTop: '0.25rem' }}>
+              ═══════════════
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

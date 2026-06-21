@@ -7,12 +7,19 @@ import StartScreen from '@/components/StartScreen'
 import HUD from '@/components/HUD'
 import DialogBox from '@/components/DialogBox'
 import MiniMap from '@/components/MiniMap'
+import QuestLog from '@/components/QuestLog'
+import Inventory from '@/components/Inventory'
+import CompletionScreen from '@/components/CompletionScreen'
+import PortfolioView from '@/components/PortfolioView'
+import FloatingModeToggle from '@/components/FloatingModeToggle'
+import MuteButton from '@/components/MuteButton'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
 const MobileControls = dynamic(() => import('@/components/MobileControls'), { ssr: false })
 
 export default function Page() {
-  const phase = useGameStore(s => s.phase)
+  const { phase, mode } = useGameStore()
+  const isActive = phase === 'playing' || phase === 'dialogue'
 
   return (
     <main className="w-screen h-screen overflow-hidden relative">
@@ -21,13 +28,25 @@ export default function Page() {
         {phase === 'start' && <StartScreen key="start" />}
       </AnimatePresence>
 
-      {(phase === 'playing' || phase === 'dialogue') && (
+      {isActive && mode === 'portfolio' && (
+        <>
+          <PortfolioView />
+          <FloatingModeToggle />
+        </>
+      )}
+
+      {isActive && mode === 'game' && (
         <>
           <GameCanvas />
           <HUD />
           <DialogBox />
           <MiniMap />
+          <QuestLog />
+          <Inventory />
+          <CompletionScreen />
+          <MuteButton />
           <MobileControls />
+          <FloatingModeToggle />
         </>
       )}
     </main>

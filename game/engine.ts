@@ -218,6 +218,5 @@ export class GameEngine {
     window.removeEventListener('game:dialogue-open', this.onDialogueOpen as EventListener)
     window.removeEventListener('game:dialogue-close', this.onDialogueClose as EventListener)
     audioEngine.stopBg()
-    audioEngine.destroy()
   }
 }

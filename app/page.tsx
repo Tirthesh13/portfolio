@@ -13,6 +13,7 @@ import CompletionScreen from '@/components/CompletionScreen'
 import PortfolioView from '@/components/PortfolioView'
 import FloatingModeToggle from '@/components/FloatingModeToggle'
 import MuteButton from '@/components/MuteButton'
+import PortraitWarning from '@/components/PortraitWarning'
 
 const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false })
 const MobileControls = dynamic(() => import('@/components/MobileControls'), { ssr: false })
@@ -47,6 +48,7 @@ export default function Page() {
           <MuteButton />
           <MobileControls />
           <FloatingModeToggle />
+          <PortraitWarning />
         </>
       )}
     </main>

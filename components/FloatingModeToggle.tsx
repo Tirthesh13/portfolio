@@ -14,19 +14,23 @@ export default function FloatingModeToggle() {
       style={{
         position: 'fixed',
         bottom: '1.5rem',
-        ...(isGame ? { left: '1rem' } : { right: '1rem' }),
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 50,
-        background: 'rgba(10,10,20,0.75)',
-        border: '1px solid rgba(124,106,247,0.5)',
-        color: '#a89ef8',
+        background: 'rgba(10,10,20,0.85)',
+        border: `1px solid ${isGame ? 'rgba(124,106,247,0.6)' : 'rgba(245,200,66,0.6)'}`,
+        color: isGame ? '#a89ef8' : '#f5c842',
         fontSize: '0.55rem',
-        padding: '6px 10px',
+        padding: '8px 16px',
         cursor: 'pointer',
-        backdropFilter: 'blur(4px)',
-        boxShadow: '0 0 8px rgba(124,106,247,0.3)',
+        backdropFilter: 'blur(6px)',
+        boxShadow: isGame
+          ? '0 0 12px rgba(124,106,247,0.35)'
+          : '0 0 12px rgba(245,200,66,0.35)',
+        whiteSpace: 'nowrap',
       }}
     >
-      {isGame ? '≡ PORTFOLIO' : '▶ PLAY GAME'}
+      {isGame ? '≡ PORTFOLIO VIEW' : '▶ PLAY GAME'}
     </button>
   )
 }

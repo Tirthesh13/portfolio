@@ -41,7 +41,7 @@ export default function MiniMap() {
   }, [playerPos])
 
   return (
-    <div className="fixed bottom-4 right-4 z-20 pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-20 pointer-events-none hidden md:block">
       <div className="border border-[#7c6af7]/40 bg-black/80">
         <p className="font-pixel text-gray-600 text-xs p-1 border-b border-[#7c6af7]/20">MAP</p>
         <canvas ref={ref} width={W} height={H} style={{ imageRendering: 'pixelated' }} />

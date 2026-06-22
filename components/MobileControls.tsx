@@ -6,13 +6,13 @@ declare global {
   interface Window { gameEngine?: GameEngine }
 }
 
-function DPadButton({ label, keyName, className }: { label: string; keyName: string; className: string }) {
+function DPadButton({ label, keyName }: { label: string; keyName: string }) {
   const handleTouch = (type: 'down' | 'up') => window.gameEngine?.simulateKey(keyName, type)
   return (
     <button
-      className={`${className} w-12 h-12 bg-black/70 border border-[#7c6af7]/50 font-pixel text-[#7c6af7] text-sm flex items-center justify-center active:bg-[#7c6af7]/30`}
-      onTouchStart={() => handleTouch('down')}
-      onTouchEnd={() => handleTouch('up')}
+      className="w-14 h-14 bg-black/75 border border-[#7c6af7]/60 font-pixel text-[#7c6af7] text-base flex items-center justify-center active:bg-[#7c6af7]/30 select-none touch-none"
+      onTouchStart={(e) => { e.preventDefault(); handleTouch('down') }}
+      onTouchEnd={(e) => { e.preventDefault(); handleTouch('up') }}
       onMouseDown={() => handleTouch('down')}
       onMouseUp={() => handleTouch('up')}
     >
@@ -23,17 +23,28 @@ function DPadButton({ label, keyName, className }: { label: string; keyName: str
 
 export default function MobileControls() {
   return (
-    <div className="fixed bottom-20 right-4 z-20 md:hidden">
-      <div className="relative w-36 h-36">
-        <DPadButton label="▲" keyName="ArrowUp" className="absolute top-0 left-12" />
-        <DPadButton label="◀" keyName="ArrowLeft" className="absolute top-12 left-0" />
-        <DPadButton label="▶" keyName="ArrowRight" className="absolute top-12 right-0" />
-        <DPadButton label="▼" keyName="ArrowDown" className="absolute bottom-0 left-12" />
+    <div className="fixed bottom-12 right-3 z-20 md:hidden flex flex-col items-end gap-2">
+      {/* D-pad */}
+      <div className="relative w-44 h-44">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2">
+          <DPadButton label="▲" keyName="ArrowUp" />
+        </div>
+        <div className="absolute top-14 left-0">
+          <DPadButton label="◀" keyName="ArrowLeft" />
+        </div>
+        <div className="absolute top-14 right-0">
+          <DPadButton label="▶" keyName="ArrowRight" />
+        </div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+          <DPadButton label="▼" keyName="ArrowDown" />
+        </div>
       </div>
+      {/* Action button */}
       <button
-        className="mt-2 w-full h-10 bg-black/70 border border-[#f5c842]/50 font-pixel text-[#f5c842] text-xs"
-        onTouchStart={() => window.gameEngine?.simulateKey('e', 'down')}
-        onTouchEnd={() => window.gameEngine?.simulateKey('e', 'up')}
+        className="w-full px-4 h-12 bg-black/80 border-2 border-[#f5c842]/70 font-pixel text-[#f5c842] text-xs active:bg-[#f5c842]/20 select-none touch-none"
+        style={{ boxShadow: '0 0 8px rgba(245,200,66,0.3)' }}
+        onTouchStart={(e) => { e.preventDefault(); window.gameEngine?.simulateKey('e', 'down') }}
+        onTouchEnd={(e) => { e.preventDefault(); window.gameEngine?.simulateKey('e', 'up') }}
         onMouseDown={() => window.gameEngine?.simulateKey('e', 'down')}
         onMouseUp={() => window.gameEngine?.simulateKey('e', 'up')}
       >

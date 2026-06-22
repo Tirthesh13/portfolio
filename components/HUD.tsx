@@ -4,7 +4,7 @@ import { useGameStore } from '@/store/gameStore'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function HUD() {
-  const { currentZone, showInteract } = useGameStore()
+  const { currentZone, showInteract, phase } = useGameStore()
   const prevZoneRef = useRef<string>(currentZone)
   const [bannerZone, setBannerZone] = useState<string | null>(null)
 
@@ -52,15 +52,17 @@ export default function HUD() {
         </div>
       </div>
 
-      {/* Controls hint */}
-      <div className="fixed bottom-4 left-4 z-20 pointer-events-none">
-        <div className="bg-black/60 border border-gray-800 p-2">
-          <p className="font-pixel text-gray-600 text-xs">WASD / ↑↓←→ MOVE</p>
-          {showInteract && (
-            <p className="font-pixel text-[#7c6af7] text-xs mt-1 blink">[ E ] INTERACT</p>
-          )}
+      {/* Controls hint — desktop only, hidden when dialogue is open */}
+      {phase !== 'dialogue' && (
+        <div className="fixed bottom-4 left-4 z-20 pointer-events-none hidden md:block">
+          <div className="bg-black/60 border border-gray-800 p-2">
+            <p className="font-pixel text-gray-600 text-xs">WASD / ↑↓←→ MOVE</p>
+            {showInteract && (
+              <p className="font-pixel text-[#7c6af7] text-xs mt-1 blink">[ E ] INTERACT</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Zone entry banner */}
       <AnimatePresence>

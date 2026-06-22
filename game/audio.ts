@@ -107,6 +107,9 @@ class AudioEngine {
   destroy() {
     this.stopBg()
     this.ctx?.close().catch(() => {})
+    this.ctx = null
+    this.masterGain = null
+    this.initialized = false
   }
 }
 

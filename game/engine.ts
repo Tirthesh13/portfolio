@@ -28,6 +28,7 @@ export class GameEngine {
   private nearestNPC: NPC | null = null
   private audioInited: boolean = false
   private footstepFrame: number = 0
+  private pendingQuestNpcId: string | null = null
 
   constructor(canvas: HTMLCanvasElement, store: StoreActions) {
     this.canvas = canvas
@@ -55,27 +56,29 @@ export class GameEngine {
     audioEngine.playOverworld()
   }
 
+  // Extracted so both keyboard and mobile touch can trigger it
+  private handleInteract() {
+    if (!this.isDialogueOpen && this.nearestNPC) {
+      this.store.openDialogue(this.nearestNPC.name, this.nearestNPC.dialogue)
+      audioEngine.sfxDialogueOpen()
+      const quest = QUEST_BY_NPC[this.nearestNPC.id]
+      if (quest) {
+        // Store the quest — dispatch AFTER dialogue is fully read, not immediately
+        this.pendingQuestNpcId = this.nearestNPC.id
+      }
+    } else if (this.isDialogueOpen) {
+      audioEngine.sfxDialogueBlip()
+      // Also dispatch advance-dialogue so DialogBox advances on mobile
+      window.dispatchEvent(new Event('game:advance-dialogue'))
+    }
+  }
+
   private onKeyDown = (e: KeyboardEvent) => {
     this.initAudioOnce()
     audioEngine.resume()
-
     this.keys.add(e.key)
     if (e.key === 'e' || e.key === 'E') {
-      if (!this.isDialogueOpen && this.nearestNPC) {
-        this.store.openDialogue(this.nearestNPC.name, this.nearestNPC.dialogue)
-        audioEngine.sfxDialogueOpen()
-
-        const quest = QUEST_BY_NPC[this.nearestNPC.id]
-        if (quest) {
-          window.dispatchEvent(
-            new CustomEvent('game:quest-complete', {
-              detail: { questId: quest.id, itemId: quest.reward },
-            })
-          )
-        }
-      } else if (this.isDialogueOpen) {
-        audioEngine.sfxDialogueBlip()
-      }
+      this.handleInteract()
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
       e.preventDefault()
@@ -92,6 +95,18 @@ export class GameEngine {
 
   private onDialogueClose = () => {
     this.isDialogueOpen = false
+    // Quest completes only after the player has read all dialogue
+    if (this.pendingQuestNpcId) {
+      const quest = QUEST_BY_NPC[this.pendingQuestNpcId]
+      if (quest) {
+        window.dispatchEvent(
+          new CustomEvent('game:quest-complete', {
+            detail: { questId: quest.id, itemId: quest.reward },
+          })
+        )
+      }
+      this.pendingQuestNpcId = null
+    }
   }
 
   private resize = () => {
@@ -116,7 +131,6 @@ export class GameEngine {
       this.player.update(this.keys, this.frameCount)
     }
 
-    // Footstep sfx every 12 frames while moving
     if (this.player.moving) {
       this.footstepFrame++
       if (this.footstepFrame % 12 === 0) {
@@ -172,7 +186,6 @@ export class GameEngine {
     renderMap(ctx, camX, camY, this.frameCount, canvas.width, canvas.height)
     this.particles.render(ctx, camX, camY)
 
-    // Draw torches at zone entrances
     for (const zone of ZONES) {
       const torchX = zone.tileX * TILE_SIZE + Math.floor(zone.width / 2) * TILE_SIZE - camX
       const torchY = (zone.tileY + zone.height) * TILE_SIZE - camY - 8
@@ -205,9 +218,19 @@ export class GameEngine {
     this.player.draw(ctx, this.player.x - camX, this.player.y - camY)
   }
 
+  // Called from MobileControls touch buttons
   simulateKey(key: string, type: 'down' | 'up') {
-    if (type === 'down') this.keys.add(key)
-    else this.keys.delete(key)
+    if (type === 'down') {
+      this.keys.add(key)
+      // Init audio on first mobile touch (browser autoplay policy)
+      this.initAudioOnce()
+      audioEngine.resume()
+      if (key === 'e' || key === 'E') {
+        this.handleInteract()
+      }
+    } else {
+      this.keys.delete(key)
+    }
   }
 
   destroy() {

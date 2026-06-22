@@ -37,15 +37,26 @@ export default function DialogBox() {
       if (e.key === 'e' || e.key === 'E' || e.key === 'Enter') advance()
       if (e.key === 'Escape') closeDialogue()
     }
-    if (phase === 'dialogue') window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [phase, done, advance])
+    // Mobile TALK button fires this event
+    const onMobileAdvance = () => advance()
+
+    if (phase === 'dialogue') {
+      window.addEventListener('keydown', onKey)
+      window.addEventListener('game:advance-dialogue', onMobileAdvance)
+    }
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('game:advance-dialogue', onMobileAdvance)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, done, dialogue?.lineIndex])
 
   return (
     <AnimatePresence>
       {phase === 'dialogue' && dialogue && (
         <motion.div
-          className="fixed bottom-0 left-0 right-0 z-30 p-4"
+          className="fixed bottom-0 left-0 right-0 z-30"
+          style={{ padding: '0 0.75rem 0.75rem' }}
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
@@ -53,32 +64,30 @@ export default function DialogBox() {
           onClick={advance}
         >
           <div
-            className="max-w-3xl mx-auto bg-black/90 border-2 border-[#7c6af7] relative"
+            className="max-w-3xl mx-auto bg-black/95 border-2 border-[#7c6af7] relative"
             style={{ boxShadow: '0 0 0 2px #0a0a0f, 0 0 0 4px #7c6af7, 0 0 20px rgba(124,106,247,0.3)' }}
           >
-            {/* Speaker name */}
             <div className="absolute -top-5 left-4 bg-[#7c6af7] px-3 py-1">
               <span className="font-pixel text-white text-xs">{dialogue.speaker}</span>
             </div>
 
-            <div className="p-5 pt-6">
+            <div className="p-4 pt-5">
               <p className="font-pixel text-white text-xs leading-6 min-h-8">{displayed}</p>
 
-              <div className="flex justify-between items-center mt-4">
+              <div className="flex justify-between items-center mt-3">
                 <span className="font-pixel text-gray-600 text-xs">
                   {dialogue.lineIndex + 1}/{dialogue.lines.length}
                 </span>
                 {done ? (
                   <span className="font-pixel text-[#7c6af7] text-xs blink">
-                    {dialogue.lineIndex < dialogue.lines.length - 1 ? '▼ NEXT [E]' : '✓ CLOSE [E]'}
+                    {dialogue.lineIndex < dialogue.lines.length - 1 ? '▼ NEXT' : '✓ CLOSE'}
                   </span>
                 ) : (
-                  <span className="font-pixel text-gray-700 text-xs">CLICK TO SKIP</span>
+                  <span className="font-pixel text-gray-700 text-xs">TAP TO SKIP</span>
                 )}
               </div>
             </div>
           </div>
-          <p className="text-center font-pixel text-gray-700 text-xs mt-2">[ESC] CLOSE</p>
         </motion.div>
       )}
     </AnimatePresence>

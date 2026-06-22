@@ -14,13 +14,13 @@ export default function Inventory() {
 
   return (
     <div
+      className="hidden md:flex"
       style={{
         position: 'fixed',
         bottom: '1.5rem',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 30,
-        display: 'flex',
         alignItems: 'center',
         gap: '0.5rem',
         background: 'rgba(0,0,0,0.75)',
